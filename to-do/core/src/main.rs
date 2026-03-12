@@ -1,30 +1,62 @@
-use clap::{Parser, parser};
-use std::env;
-
+mod api;
 mod enums;
 mod structs;
-mod api;
+
+use structs::done::Done;
+use structs::pending::Pending;
+
+use crate::enums::TaskStatus;
+use api::basic_actions::create::create;
+use clap::Parser;
 
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
-
 struct Args {
-    /// first name of user
     #[arg(short, long)]
-    first_name: String,
-
-    /// last name of user
+    title: String,
     #[arg(short, long)]
-    last_name: String,
-
-    /// age of user
-    #[arg(short, long, default_value_t = 1)]
-    age: u8,
+    status: String,
 }
-fn main() {
+fn main() -> Result<(), String> {
+    let done = Done::new("shopping");
+    println!("{}", done.super_struct.title);
+    println!("{}", done.super_struct.status);
+
+    let pending = Pending::new("Eat");
+    println!("{}", pending.super_struct.title);
+    println!("{}", pending.super_struct.status);
+
     let args = Args::parse();
-
-    println!("{:?}", args.first_name);
-    println!("{:?}", args.last_name);
-    println!("{:?}", args.age);
+    let status_enum = TaskStatus::from_string(&args.status)?;
+    let to_do_item = create(&args.title, status_enum)?;
+    println!("{}", to_do_item);
+    Ok(())
 }
+
+// mod api;
+// mod enums;
+// mod structs;
+
+// use structs::done::Done;
+// use structs::pending::Pending;
+
+// use crate::enums::TaskStatus;
+// use api::basic_actions::create::create;
+// use clap::Parser;
+
+// #[derive(Parser, Debug)]
+// #[command(version, about, long_about = None)]
+// struct Args {
+//     #[arg(short, long)]
+//     title: String,
+//     #[arg(short, long)]
+//     status: String,
+// }
+
+// fn main() -> Result<(), String> {
+//     let args = Args::parse();
+//     let status_enum = TaskStatus::from_string(&args.status)?;
+//     let to_do_item = create(&args.title, status_enum)?;
+//     println!("{}", to_do_item);
+//     Ok(())
+// }

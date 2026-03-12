@@ -3953,6 +3953,16 @@ name = "to-do-core"
 version = "0.1.0"
 dependencies = [
  "clap",
+ "serde",
+ "to-do-dal",
+]
+
+[[package]]
+name = "to-do-dal"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
 ]
 
 [[package]]

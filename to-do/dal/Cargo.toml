@@ -1,0 +1,11 @@
+[package]
+name = "to-do-dal"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+serde_json = {version = "1.0.149", optional = true}
+serde = {version = "1.0.228", optional = true}
+
+[features]
+json-file = ["serde_json", "serde"]
