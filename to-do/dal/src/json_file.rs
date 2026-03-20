@@ -4,49 +4,73 @@ use std::env;
 use std::fs::{File, OpenOptions};
 use std::io::{Read, Write};
 
-fn get_handle(path: Option<&str>) -> Result<File, String> {
+use glue::errors::{SchedulerServiceError, SchedulerServiceErrorStatus};
+use glue::safe_eject;
+
+fn get_handle(path: Option<&str>) -> Result<File, SchedulerServiceError> {
     let path = match path {
         Some(p) => p,
         None => &env::var("JSON_STORE_PATH").unwrap_or("./tasks.json".to_string()),
     };
 
-    let file = OpenOptions::new()
-        .read(true)
-        .write(true)
-        .create(true)
-        .open(&path)
-        .map_err(|e| format!("Error opening file {}", e))?;
-    Ok(file)
+    safe_eject!(
+        OpenOptions::new()
+            .read(true)
+            .write(true)
+            .create(true)
+            .open(&path),
+        SchedulerServiceErrorStatus::Unknown,
+        "Error writing tasks with JSON file"
+    )
 }
 
-pub fn get_all<T: DeserializeOwned>() -> Result<HashMap<String, T>, String> {
+pub fn get_all<T: DeserializeOwned>() -> Result<HashMap<String, T>, SchedulerServiceError> {
     let mut file = get_handle(None)?;
     let mut contents = String::new();
-    file.read_to_string(&mut contents)
-        .map_err(|e| format!("Error reading file: {}", e))?;
-    let tasks: HashMap<String, T> =
-        serde_json::from_str(&contents).map_err(|e| format!("Error parsing JSON: {}", e))?;
+    safe_eject!(
+        file.read_to_string(&mut contents),
+        SchedulerServiceErrorStatus::Unknown,
+        "Error reading JSON file to get all tasks"
+    )?;
+
+    let tasks: HashMap<String, T> = safe_eject!(
+        serde_json::from_str(&contents),
+        SchedulerServiceErrorStatus::Unknown,
+        "Error parsing JSON file"
+    )?;
+
     Ok(tasks)
 }
 
-pub fn save_all<T: Serialize>(tasks: &HashMap<String, T>) -> Result<(), String> {
+pub fn save_all<T: Serialize>(tasks: &HashMap<String, T>) -> Result<(), SchedulerServiceError> {
     let mut file = get_handle(None)?;
-    let json = serde_json::to_string_pretty(tasks)
-        .map_err(|e| format!("Error Serializing JSON: {}", e))?;
-    file.write_all(json.as_bytes())
-        .map_err(|e| format!("Error writing file {}", e))?;
+    let json = safe_eject!(
+        serde_json::to_string_pretty(tasks),
+        SchedulerServiceErrorStatus::Unknown,
+        "Error serializing JSON before saving tasks"
+    )?;
+
+    safe_eject!(
+        file.write_all(json.as_bytes()),
+        SchedulerServiceErrorStatus::Unknown,
+        "Error writing task to JSON file"
+    )?;
+
     Ok(())
 }
 
-pub fn get_one<T: DeserializeOwned + Clone>(id: &str) -> Result<T, String> {
+pub fn get_one<T: DeserializeOwned + Clone>(id: &str) -> Result<T, SchedulerServiceError> {
     let tasks = get_all::<T>()?;
     match tasks.get(id) {
         Some(t) => Ok(t.clone()),
-        None => Err(format!("Task with id {} not found", id)),
+        None => Err(SchedulerServiceError::new(
+            format!("Task with id {} not found", id),
+            SchedulerServiceErrorStatus::Unknown,
+        )),
     }
 }
 
-pub fn save_one<T>(id: &str, task: &T) -> Result<(), String>
+pub fn save_one<T>(id: &str, task: &T) -> Result<(), SchedulerServiceError>
 where
     T: Serialize + DeserializeOwned + Clone,
 {
@@ -55,7 +79,7 @@ where
     save_all(&tasks)
 }
 
-pub fn delete_one<T>(id: &str) -> Result<(), String>
+pub fn delete_one<T>(id: &str) -> Result<(), SchedulerServiceError>
 where
     T: Serialize + DeserializeOwned + Clone,
 {

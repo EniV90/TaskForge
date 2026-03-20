@@ -1,29 +1,18 @@
 use std::fmt;
 
 use crate::enums::TaskStatus;
-use crate::structs::{done::Done, pending::Pending};
-use to_do_dal::json_file::save_one;
+use crate::structs::TodoItems;
+use glue::errors::SchedulerServiceError;
 
 #[cfg(feature = "json-file-storage")]
+use to_do_dal::json_file::save_one;
 
-pub enum ItemTypes {
-    Done(Done),
-    Pending(Pending),
-}
+pub fn create(title: &str, status: TaskStatus) -> Result<TodoItems, SchedulerServiceError> {
+    let items = TodoItems {
+        title: title.to_string(),
+        status,
+    };
 
-impl fmt::Display for ItemTypes {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            ItemTypes::Pending(pending) => write!(f, "Pending: {}", pending.super_struct.title),
-            ItemTypes::Done(done) => write!(f, "Done: {}", done.super_struct.title),
-        }
-    }
-}
-
-pub fn create(title: &str, status: TaskStatus) -> Result<ItemTypes, String> {
-    let _ = save_one(&title.to_string(), &status)?;
-    match status {
-        TaskStatus::PENDING => {Ok(ItemTypes::Pending(Pending::new(&title)))},
-        TaskStatus::DONE => {Ok(ItemTypes::Done(Done::new(&title)))},
-    }
+    let _ = save_one(&title.to_string(), &items)?;
+    Ok(items)
 }

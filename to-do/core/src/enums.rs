@@ -1,3 +1,4 @@
+use glue::errors::{SchedulerServiceError, SchedulerServiceErrorStatus};
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
@@ -21,11 +22,14 @@ impl fmt::Display for TaskStatus {
 }
 
 impl TaskStatus {
-    pub fn from_string(status: &String) -> Result<TaskStatus, String> {
+    pub fn from_string(status: &String) -> Result<TaskStatus, SchedulerServiceError> {
         match status.to_uppercase().as_str() {
             "DONE" => Ok(TaskStatus::DONE),
             "PENDING" => Ok(TaskStatus::PENDING),
-            _ => Err(format!("Invalid status: {}", status)),
+            _ => Err(SchedulerServiceError::new(
+                "Invalid status".to_string(),
+                SchedulerServiceErrorStatus::BadRequest,
+            )),
         }
     }
 }
