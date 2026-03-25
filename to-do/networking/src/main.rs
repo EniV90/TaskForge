@@ -2,10 +2,6 @@ mod api;
 
 use actix_web::{App, HttpRequest, HttpServer, Responder};
 
-async fn greet(req: HttpRequest) -> impl Responder {
-    let name = req.match_info().get("name").unwrap_or("world");
-    format!("Hello {}", name)
-}
 
 #[tokio::main]
 async fn main() -> std::io::Result<()> {

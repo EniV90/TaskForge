@@ -4,8 +4,14 @@ pub mod get;
 pub mod update;
 
 
-use actix_web::web::{ServiceConfig, get, scope};
+
+use actix_web::web::{self, ServiceConfig};
 
 pub fn basic_actions_factory(app: &mut ServiceConfig) {
-    app.service(scope("/api/v1").route("get/all", get().to(get::get_all)));
+    app.service(
+        web::scope("/api/v1")
+            .service(web::resource("/get/all").route(web::get().to(get::get_all)))
+            .service(web::resource("/get/{name}").route(web::get().to(get::get_by_name)))
+            .service(web::resource("/create").route(web::post().to(create::create))),
+    );
 }
