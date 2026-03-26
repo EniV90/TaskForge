@@ -1,14 +1,10 @@
 {
-  "eating": {
-    "title": "eating",
-    "status": "DONE"
-  },
   "writing": {
     "title": "writing",
     "status": "PENDING"
   },
-  "coding": {
-    "title": "coding",
+  "eating": {
+    "title": "eating",
     "status": "DONE"
   }
 }

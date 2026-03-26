@@ -43,7 +43,7 @@ pub fn get_all<T: DeserializeOwned>() -> Result<HashMap<String, T>, SchedulerSer
 }
 
 pub fn save_all<T: Serialize>(tasks: &HashMap<String, T>) -> Result<(), SchedulerServiceError> {
-    let mut file = get_handle(None)?;
+    let mut file = get_write_handle(None)?;
     let json = safe_eject!(
         serde_json::to_string_pretty(tasks),
         SchedulerServiceErrorStatus::Unknown,
@@ -79,11 +79,36 @@ where
     save_all(&tasks)
 }
 
-pub fn delete_one<T>(id: &str) -> Result<(), SchedulerServiceError>
+pub fn delete_one<T>(id: &str) -> Result<T, SchedulerServiceError>
 where
-    T: Serialize + DeserializeOwned + Clone,
+    T: Serialize + DeserializeOwned + Clone + std::fmt::Debug,
 {
     let mut tasks = get_all::<T>().unwrap_or(HashMap::new());
-    tasks.remove(id);
-    save_all(&tasks)
+    match tasks.remove(id) {
+        Some(deleted_item) => {
+            save_all(&tasks)?;
+            Ok(deleted_item)
+        }
+        None => Err(SchedulerServiceError::new(
+            format!("Tasks with id {} not found", id),
+            SchedulerServiceErrorStatus::NotFound,
+        )),
+    }
+}
+
+fn get_write_handle(path: Option<&str>) -> Result<File, SchedulerServiceError> {
+    let path = match path {
+        Some(p) => p,
+        None => &env::var("JSON_STORE_PATH").unwrap_or("./tasks.json".to_string()),
+    };
+    let file = safe_eject!(
+        OpenOptions::new()
+            .write(true)
+            .create(true)
+            .truncate(true) // ensures file is empty
+            .open(&path),
+        SchedulerServiceErrorStatus::Unknown,
+        "Error reading JSON file (write handle)"
+    )?;
+    Ok(file)
 }
