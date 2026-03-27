@@ -42,6 +42,7 @@ echo "" >> output.txt
 # Update task
 curl -X PATCH http://127.0.0.1:8080/api/v1/update \
   -H "Content-Type: application/json" \
+  -H "token: some token" \
   -d '{"title": "gaming", "status": "DONE"}' >> output.txt
 
 echo "" >> output.txt
