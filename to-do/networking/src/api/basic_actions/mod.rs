@@ -13,6 +13,7 @@ pub fn basic_actions_factory(app: &mut ServiceConfig) {
             .service(web::resource("/create").route(web::post().to(create::create)))
             .service(
                 web::resource("/delete/{name}").route(web::delete().to(delete::delete_by_name)),
-            ),
+            )
+            .service(web::resource("/update").route(web::patch().to(update::update))),
     );
 }
