@@ -6,5 +6,5 @@ use to_do_core::structs::TodoItems;
 pub async fn create(body: Json<TodoItems>) -> Result<HttpResponse, SchedulerServiceError> {
     let _ = create_core(body.into_inner()).await?;
 
-    Ok(HttpResponse::Ok().json(get_all_core().await?))
+    Ok(HttpResponse::Created().json(get_all_core().await?))
 }

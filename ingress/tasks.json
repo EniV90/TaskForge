@@ -1,10 +1,18 @@
 {
+  "sleep": {
+    "title": "sleep",
+    "status": "PENDING"
+  },
   "gaming": {
     "title": "gaming",
     "status": "DONE"
   },
   "driving": {
     "title": "driving",
+    "status": "PENDING"
+  },
+  "ball": {
+    "title": "ball",
     "status": "PENDING"
   }
 }
