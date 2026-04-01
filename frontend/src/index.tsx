@@ -4,11 +4,26 @@ import { TodoItems } from "./interfaces/toDoItems";
 import { ToDoItem } from "./components/ToDoItem";
 import getAll from "./api/get";
 import { CreateToDoItem } from "./components/createItemForm";
+import init, {
+  rust_generate_button_text,
+} from "../rust-interface/pkg/rust_interface";
 import "./App.css";
 
 const App = () => {
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
+  const [wasmReady, setWasmReady] = useState<Boolean>(false);
+  const [RustGenerateButtonText, setGenerateButtonText] =
+    useState<(input: string) => string>(null);
+
+  React.useEffect(() => {
+    init()
+      .then(() => {
+        setGenerateButtonText(() => rust_generate_button_text);
+        setWasmReady(true);
+      })
+      .catch((e) => console.error("Error initializing WASM:", e));
+  }, []);
 
   function reRenderItems(response: any) {
     if (response.error) {
@@ -31,9 +46,10 @@ const App = () => {
         setData(response.data);
       }
     };
-
-    fetchData();
-  }, []);
+    if (wasmReady) {
+      fetchData();
+    }
+  }, [wasmReady]);
 
   if (error) {
     return <div style={{ color: "red" }}>Error: {error}</div>;
@@ -58,6 +74,7 @@ const App = () => {
                 title={item.title}
                 status={item.status}
                 id={item.id}
+                buttonMessage={RustGenerateButtonText(item.status)}
                 passBackResponse={reRenderItems}
               />
             </>
@@ -73,6 +90,7 @@ const App = () => {
                 title={item.title}
                 status={item.status}
                 id={item.id}
+                buttonMessage={RustGenerateButtonText(item.status)}
                 passBackResponse={reRenderItems}
               />
             </>

@@ -8,6 +8,7 @@ interface ToDoItemsProps {
   status: string;
   id: number;
   passBackResponse: (response: any) => void;
+  buttonMessage: string;
 }
 
 export const ToDoItem: React.FC<ToDoItemsProps> = ({
@@ -15,6 +16,7 @@ export const ToDoItem: React.FC<ToDoItemsProps> = ({
   status,
   id,
   passBackResponse,
+  buttonMessage,
 }) => {
   const [itemTitle, setItemTitle] = useState<string>(title);
   const [button, setButton] = useState<string>("");
@@ -27,7 +29,7 @@ export const ToDoItem: React.FC<ToDoItemsProps> = ({
   }, [status]);
 
   const sendRequest = async () => {
-    if (button === "edit") {
+    if (buttonMessage === "edit") {
       await updateToDoItemCall(itemTitle, TaskStatus.DONE).then((response) => {
         if (response.data) {
           passBackResponse(response.data);
@@ -49,7 +51,7 @@ export const ToDoItem: React.FC<ToDoItemsProps> = ({
     <div className="itemContainer" id={id}>
       <p>{itemTitle}</p>
       <button className="actionButton" onClick={sendRequest}>
-        {button}
+        {buttonMessage}
       </button>
     </div>
   );
