@@ -1,0 +1,12 @@
+
+services:
+  postgres:
+    container_name: "TaskForge-postgres"
+    image: "postgres:15"
+    restart: always
+    ports:
+      - "5433:5432"
+    environment:
+      - "POSTGRES_USER=username"
+      - "POSTGRES_DB=taskForge"
+      - "POSTGRES_PASSWORD=password"
