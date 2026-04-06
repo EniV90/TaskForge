@@ -1,4 +1,4 @@
-use crate::structs::{AllTodoItems, TodoItems};
+use crate::structs::TodoItems;
 use glue::errors::{SchedulerServiceError, SchedulerServiceErrorStatus};
 use to_do_dal::json_file::get_all as get_all_handle;
 use to_do_dal::to_do_items::schema::AllToDOItems;

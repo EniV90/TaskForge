@@ -1,9 +1,7 @@
 use actix_web::{HttpResponse, web::Json};
-use glue::{errors::SchedulerServiceError, token::HeaderToken};
-use to_do_core::api::basic_actions::{
-    create::create as create_core, get::get_all as get_all_core, update::update as update_core,
-};
-use to_do_core::structs::TodoItems;
+use glue::errors::SchedulerServiceError;
+use to_do_core::api::basic_actions::{get::get_all as get_all_core, update::update as update_core};
+
 use to_do_dal::to_do_items::schema::ToDoItem;
 use to_do_dal::to_do_items::transactions::{get::GetAll, update::UpdateOne};
 

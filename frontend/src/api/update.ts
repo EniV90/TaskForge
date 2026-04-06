@@ -1,11 +1,16 @@
-import { TaskStatus, TodoItem, TodoItems } from "../interfaces/toDoItems";
+import { TaskStatus, ToDoItem, ToDoItems } from "../interfaces/toDoItems";
 import { Url } from "./url";
 import { patchCall } from "./utils";
 
-export async function updateToDoItemCall(name: string, status: TaskStatus) {
-  const toDoItem: TodoItem = {
+export async function updateToDoItemCall(
+  name: string,
+  status: TaskStatus,
+  id: number
+) {
+  const toDoItem: ToDoItem = {
     title: name,
     status: status,
+    id: id,
   };
-  return patchCall<TodoItem, TodoItems>(new Url().update, toDoItem, 200);
+  return patchCall<ToDoItem, ToDoItems>(new Url().update, toDoItem, 200);
 }

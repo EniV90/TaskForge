@@ -1,4 +1,3 @@
-use crate::structs::TodoItems;
 use glue::errors::SchedulerServiceError;
 use to_do_dal::to_do_items::transactions::delete::DeleteOne;
 

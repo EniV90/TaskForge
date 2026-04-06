@@ -23,6 +23,10 @@ npm run build
 # Go back to ingress
 cd ../ingress
 
-# Run server
 cargo clean
+
+ # Export environment variables
+export $(cat .env | xargs)
+
+# Run server
 cargo run

@@ -1,8 +1,8 @@
 use actix_web::{HttpResponse, web::Json};
-use glue::errors::{SchedulerServiceError, SchedulerServiceErrorStatus};
+use glue::errors::{SchedulerServiceError};
 use glue::token::HeaderToken;
 use to_do_core::api::basic_actions::{create::create as create_core, get::get_all as get_all_core};
-use to_do_core::structs::TodoItems;
+
 use to_do_dal::to_do_items::schema::NewToDoItem;
 use to_do_dal::to_do_items::transactions::{create::SaveOne, get::GetAll};
 

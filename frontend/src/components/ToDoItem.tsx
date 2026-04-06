@@ -30,7 +30,7 @@ export const ToDoItem: React.FC<ToDoItemsProps> = ({
 
   const sendRequest = async () => {
     if (buttonMessage === "edit") {
-      await updateToDoItemCall(itemTitle, TaskStatus.DONE).then((response) => {
+      await updateToDoItemCall(title, TaskStatus.DONE, id).then((response) => {
         if (response.data) {
           passBackResponse(response.data);
         } else if (response.error) {

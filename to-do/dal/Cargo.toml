@@ -12,7 +12,7 @@ serde = {version = "1.0.228", optional = true}
 glue = {path = "../../glue"}
 
 # for sqlx-postgres
-sqlx = {version = "0.8.6", features = ["postgres", "json"], optional = true}
+sqlx = {version = "0.8.6", features = ["postgres", "json", "runtime-tokio"], optional = true}
 
 [features]
 json-file = ["serde_json", "serde"]
