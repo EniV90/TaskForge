@@ -9,4 +9,4 @@ cargo-docs = "0.1.34"
 
 [workspace]
 resolver = "2"
-members = ["frontend/rust-interface","glue", "ingress", "to-do/core", "to-do/dal", "to-do/networking",]
+members = ["auth/core", "auth/dal", "auth/networking","frontend/rust-interface","glue", "ingress", "to-do/core", "to-do/dal", "to-do/networking",]

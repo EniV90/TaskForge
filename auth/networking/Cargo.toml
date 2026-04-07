@@ -1,0 +1,11 @@
+[package]
+name = "auth-networking-server"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+actix-web = "4.13.0"
+tokio = {version = "1.51.0", features = ["full"]}
+auth-core = {path = "../core"}
+auth-dal = {path = "../dal"}
+glue = {path = "../../glue", features = ["actix"]}
