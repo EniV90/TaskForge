@@ -4,6 +4,9 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-serde = {version = "1.0.228", optional = true}
+serde = {version = "1.0.228", features = ["derive"]}
 glue ={path = "../../glue"}
 sqlx = {version = "0.8.6", features = ["postgres", "json", "runtime-tokio"], optional = false}
+argon2 = {version = "0.5.3", features = ["password-hash"]}
+uuid = {version = "1.23.0", features = ["serde", "v4"]}
+rand = "0.10.0"
