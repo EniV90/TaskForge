@@ -7,3 +7,4 @@ edition = "2024"
 auth-dal ={path = "../dal"}
 glue = {path = "../../glue"}
 serde = {version = "1.0.228", features = ["derive"]}
+actix-web = "4.13.0"

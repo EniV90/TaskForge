@@ -14,7 +14,7 @@ pub struct NewUser {
 }
 
 impl NewUser {
-    fn new(email: String, password: String) -> Result<NewUser, SchedulerServiceError> {
+    pub fn new(email: String, password: String) -> Result<NewUser, SchedulerServiceError> {
         let unique_id = uuid::Uuid::new_v4().to_string();
         let salt = SaltString::generate(&mut OsRng);
         let argon2_hasher = Argon2::default();
