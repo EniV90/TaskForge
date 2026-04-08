@@ -2,6 +2,7 @@ pub mod api;
 use actix_web::{App, HttpServer};
 use api::views_factory;
 use auth_dal::migrations::run_migrations;
+pub mod extract_auth;
 
 #[tokio::main]
 async fn main() -> std::io::Result<()> {

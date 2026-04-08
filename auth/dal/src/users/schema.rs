@@ -45,7 +45,7 @@ pub struct User {
 }
 
 impl User {
-    fn verify_password(&self, password: String) -> Result<bool, SchedulerServiceError> {
+    pub fn verify_password(&self, password: String) -> Result<bool, SchedulerServiceError> {
         let argon2_hasher = Argon2::default();
         let parsed_hash = PasswordHash::new(&self.password).map_err(|e| {
             SchedulerServiceError::new(
