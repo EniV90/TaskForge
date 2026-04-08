@@ -3,6 +3,8 @@ use rust_embed::RustEmbed;
 use std::path::Path;
 
 use actix_cors::Cors;
+use auth_dal::migrations::run_migrations as run_auth_migrations;
+use auth_server::api::views_factory as auth_views_factory;
 use to_do_dal::migrations::run_migrations as run_todo_migrations;
 use to_do_server::api::views_factory as to_do_views_factory;
 
@@ -62,6 +64,7 @@ async fn catch_all(req: HttpRequest) -> impl Responder {
 #[tokio::main]
 async fn main() -> std::io::Result<()> {
     run_todo_migrations().await;
+    run_auth_migrations().await;
     HttpServer::new(|| {
         let cors = Cors::default()
             .allow_any_origin()
@@ -70,6 +73,7 @@ async fn main() -> std::io::Result<()> {
 
         App::new()
             .configure(to_do_views_factory)
+            .configure(auth_views_factory)
             .wrap(cors)
             .default_service(web::route().to(catch_all))
     })

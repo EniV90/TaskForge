@@ -2897,6 +2897,8 @@ version = "0.1.0"
 dependencies = [
  "actix-cors",
  "actix-web",
+ "auth-dal",
+ "auth-networking-server",
  "mime_guess",
  "rust-embed",
  "to-do-dal",

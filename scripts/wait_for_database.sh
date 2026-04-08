@@ -12,4 +12,4 @@ do
   sleep 2;
   done
   echo "docker is now running"
-  docker-compose down 
+  # docker-compose down 

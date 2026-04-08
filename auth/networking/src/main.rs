@@ -1,5 +1,6 @@
-pub mod api;
+
 use actix_web::{App, HttpServer};
+mod api;
 use api::views_factory;
 use auth_dal::migrations::run_migrations;
 pub mod extract_auth;
