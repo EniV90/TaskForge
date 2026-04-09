@@ -5,12 +5,14 @@ export class Url {
   create: string;
   getAll: string;
   update: string;
+  login: string;
 
   constructor() {
     this.baseUrl = Url.getBaseUrl();
     this.create = `${this.baseUrl}api/v1/create`;
     this.getAll = `${this.baseUrl}api/v1/get/all`;
     this.update = `${this.baseUrl}api/v1/update`;
+    this.login = `${this.baseUrl}api/v1/auth/login`;
   }
   // Because the frontend has it's development server which runs on 3000, the main development server is 8001, if the location is on the
   // development server (frontend - 3001), change it to the backend rust development server (8001)

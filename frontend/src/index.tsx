@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { createRoot } from "react-dom/client";
-import { TodoItems } from "./interfaces/toDoItems";
+// import { TodoItems } from "./interfaces/toDoItems";
 import { ToDoItem } from "./components/ToDoItem";
 import getAll from "./api/get";
 import { CreateToDoItem } from "./components/createItemForm";
@@ -8,6 +8,7 @@ import init, {
   rust_generate_button_text,
 } from "../rust-interface/pkg/rust_interface";
 import "./App.css";
+import { LoginForm } from "./components/LoginForm";
 
 const App = () => {
   const [data, setData] = useState(null);
@@ -15,6 +16,9 @@ const App = () => {
   const [wasmReady, setWasmReady] = useState<Boolean>(false);
   const [RustGenerateButtonText, setGenerateButtonText] =
     useState<(input: string) => string>(null);
+  const [LoggedIn, setLoggedIn] = useState<Boolean>(
+    localStorage.getItem("token") !== null
+  );
 
   React.useEffect(() => {
     init()
@@ -37,6 +41,11 @@ const App = () => {
     }
   }
 
+  function setToken(token: string) {
+    localStorage.setItem("token", token);
+    setLoggedIn(true);
+  }
+
   React.useEffect(() => {
     const fetchData = async () => {
       const response = await getAll();
@@ -46,10 +55,13 @@ const App = () => {
         setData(response.data);
       }
     };
-    if (wasmReady) {
+    if (wasmReady && LoggedIn) {
       fetchData();
     }
-  }, [wasmReady]);
+  }, [wasmReady, LoggedIn]);
+  if (localStorage.getItem("token") === null) {
+    return <LoginForm setToken={setToken} />;
+  }
 
   if (error) {
     return <div style={{ color: "red" }}>Error: {error}</div>;
