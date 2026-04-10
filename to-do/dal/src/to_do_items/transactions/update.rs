@@ -16,25 +16,20 @@ use crate::connections::sqlx_postgres::SQLX_POSTGRES_POOL;
 #[cfg(any(feature = "sqlx-postgres", feature = "json-file"))]
 use glue::errors::SchedulerServiceErrorStatus;
 
+pub type UpdateOneResponse = Result<ToDoItem, SchedulerServiceError>;
 pub trait UpdateOne {
-    fn update_one(
-        item: ToDoItem,
-    ) -> impl Future<Output = Result<ToDoItem, SchedulerServiceError>> + Send;
+    fn update_one(item: ToDoItem, user_id: i32) -> impl Future<Output = UpdateOneResponse> + Send;
 }
 #[cfg(feature = "sqlx-postgres")]
 impl UpdateOne for SqlxPostGresDescriptor {
-    fn update_one(
-        item: ToDoItem,
-    ) -> impl Future<Output = Result<ToDoItem, SchedulerServiceError>> + Send {
+    fn update_one(item: ToDoItem, _user_id: i32) -> impl Future<Output = UpdateOneResponse> + Send {
         sqlx_postgres_update_one(item)
     }
 }
 #[cfg(feature = "json-file")]
 impl UpdateOne for JsonFileDescriptor {
-    fn update_one(
-        item: ToDoItem,
-    ) -> impl Future<Output = Result<ToDoItem, SchedulerServiceError>> + Send {
-        json_file_update_one(item)
+    fn update_one(item: ToDoItem, user_id: i32) -> impl Future<Output = UpdateOneResponse> + Send {
+        json_file_update_one(item, user_id)
     }
 }
 #[cfg(feature = "sqlx-postgres")]
@@ -55,15 +50,16 @@ async fn sqlx_postgres_update_one(item: ToDoItem) -> Result<ToDoItem, SchedulerS
     Ok(item)
 }
 #[cfg(feature = "json-file")]
-async fn json_file_update_one(item: ToDoItem) -> Result<ToDoItem, SchedulerServiceError> {
+async fn json_file_update_one(item: ToDoItem, user_id: i32) -> UpdateOneResponse {
     let mut tasks = get_all::<ToDoItem>().unwrap_or_else(|_| HashMap::new());
-    if !tasks.contains_key(&item.title) {
+    let key = item.title.clone() + ":" + &user_id.to_string();
+    if !tasks.contains_key(&key) {
         return Err(SchedulerServiceError::new(
             format!("Item with name {} not found", item.title),
             SchedulerServiceErrorStatus::NotFound,
         ));
     }
-    tasks.insert(item.title.clone(), item.clone());
+    tasks.insert(key, item.clone());
     let _ = save_all(&tasks)?;
     Ok(item)
 }

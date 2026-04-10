@@ -4,8 +4,8 @@ use to_do_dal::json_file::get_all as get_all_handle;
 use to_do_dal::to_do_items::schema::AllToDOItems;
 use to_do_dal::to_do_items::transactions::get::GetAll;
 
-pub async fn get_all<T: GetAll>() -> Result<AllToDOItems, SchedulerServiceError> {
-    let all_items = T::get_all().await?;
+pub async fn get_all<T: GetAll>(user_id: i32) -> Result<AllToDOItems, SchedulerServiceError> {
+    let all_items = T::get_all(user_id).await?;
     AllToDOItems::from_vec(all_items)
 }
 

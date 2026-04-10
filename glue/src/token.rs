@@ -1,8 +1,6 @@
 // Defining Header token modules
 
 use crate::errors::{SchedulerServiceError, SchedulerServiceErrorStatus};
-use actix_web::cookie::time::error;
-use futures::future::ok;
 use jsonwebtoken::{Algorithm, DecodingKey, EncodingKey, Header, Validation, decode, encode};
 use serde::{Deserialize, Serialize};
 
@@ -33,7 +31,7 @@ impl HeaderToken {
     pub fn decode(token: &str) -> Result<Self, SchedulerServiceError> {
         let key_str = Self::get_key()?;
         let key = DecodingKey::from_secret(key_str.as_ref());
-        let mut validation = Validation::new(Algorithm::ES256);
+        let mut validation = Validation::new(Algorithm::HS256);
         validation.required_spec_claims.remove("exp");
 
         match decode::<Self>(token, &key, &validation) {

@@ -1,6 +1,6 @@
 import React from "react";
 import { login } from "../api/login";
-
+import "../login.css"
 interface LoginFormProps {
   setToken: (token: string) => void;
 }

@@ -8,7 +8,10 @@ clap ={ version = "4.5.60", features = ["derive"]}
 serde = {version = "1.0.228", features = ["derive"]}
 to-do-dal = {path = "../dal"}
 glue = {path = "../../glue"}
+auth-kernel = {path = "../../auth/kernel"}
 
 [features]
 json-file-storage = ["to-do-dal/json-file"]
 default = ["json-file-storage"]
+memory =["auth-kernel/core-postgres"]
+http=["auth-kernel/http"]

@@ -1,5 +1,5 @@
 use super::super::descriptors::SqlxPostGresDescriptor;
-use crate::connections::sqlx_postgres::{self, SQLX_POSTGRES_POOL};
+use crate::connections::sqlx_postgres::SQLX_POSTGRES_POOL;
 use crate::users::schema::{NewUser, User};
 use glue::errors::{SchedulerServiceError, SchedulerServiceErrorStatus};
 use std::future::Future;
@@ -17,7 +17,7 @@ impl SaveOne for SqlxPostGresDescriptor {
 async fn sqlx_postgres_save_one(user: NewUser) -> Result<User, SchedulerServiceError> {
     let user = sqlx::query_as::<_, User>(
         "INSERT INTO users (email, password, unique_id)
-  VALUES ($1 $2 $3) RETURNING *",
+  VALUES ($1, $2, $3) RETURNING *",
     )
     .bind(user.email)
     .bind(user.password.to_string())

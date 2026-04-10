@@ -28,7 +28,7 @@ pub async fn extrect_credentials(req: HttpRequest) -> Result<Credentials, Schedu
         }
     };
 
-    if !encoded.starts_with("basic") {
+    if !encoded.starts_with("Basic") {
         return Err(SchedulerServiceError::new(
             "Invalid string".to_string(),
             SchedulerServiceErrorStatus::Unauthorized,

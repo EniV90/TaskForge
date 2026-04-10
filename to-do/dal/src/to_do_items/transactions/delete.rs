@@ -16,32 +16,28 @@ use crate::connections::sqlx_postgres::SQLX_POSTGRES_POOL;
 #[cfg(any(feature = "sqlx-postgres", feature = "json-file"))]
 use glue::errors::SchedulerServiceErrorStatus;
 
+pub type DeleteOneResponse = Result<ToDoItem, SchedulerServiceError>;
+
 pub trait DeleteOne {
-    fn delete_one(
-        title: String,
-    ) -> impl Future<Output = Result<ToDoItem, SchedulerServiceError>> + Send;
+    fn delete_one(title: String, user_id: i32) -> impl Future<Output = DeleteOneResponse> + Send;
 }
 
 #[cfg(feature = "sqlx-postgres")]
 impl DeleteOne for SqlxPostGresDescriptor {
-    fn delete_one(
-        title: String,
-    ) -> impl Future<Output = Result<ToDoItem, SchedulerServiceError>> + Send {
-        sqlx_postgres_delete_one(title)
+    fn delete_one(title: String, user_id: i32) -> impl Future<Output = DeleteOneResponse> + Send {
+        sqlx_postgres_delete_one(title, user_id)
     }
 }
 
 #[cfg(feature = "json-file")]
 impl DeleteOne for JsonFileDescriptor {
-    fn delete_one(
-        title: String,
-    ) -> impl Future<Output = Result<ToDoItem, SchedulerServiceError>> + Send {
-        json_file_delete_one(title)
+    fn delete_one(title: String, user_id: i32) -> impl Future<Output = DeleteOneResponse> + Send {
+        json_file_delete_one(title, user_id)
     }
 }
 
 #[cfg(feature = "sqlx-postgres")]
-async fn sqlx_postgres_delete_one(title: String) -> Result<ToDoItem, SchedulerServiceError> {
+async fn sqlx_postgres_delete_one(title: String, user_id: i32) -> DeleteOneResponse {
     let item =
         sqlx::query_as::<_, ToDoItem>(" DELETE FROM to_do_items WHERE title = $1 RETURNING *")
             .bind(title)
@@ -50,18 +46,29 @@ async fn sqlx_postgres_delete_one(title: String) -> Result<ToDoItem, SchedulerSe
             .map_err(|e| {
                 SchedulerServiceError::new(e.to_string(), SchedulerServiceErrorStatus::Unknown)
             })?;
+
+    let _ = sqlx::query(" DELETE FROM user_connections WHERE user_id = $1 AND to_do_id = $2")
+        .bind(user_id)
+        .bind(item.id)
+        .execute(&*SQLX_POSTGRES_POOL)
+        .await
+        .map_err(|e| {
+            SchedulerServiceError::new(e.to_string(), SchedulerServiceErrorStatus::Unknown)
+        })?;
     Ok(item)
 }
 
 #[cfg(feature = "json-file")]
-async fn json_file_delete_one(title: String) -> Result<ToDoItem, SchedulerServiceError> {
+async fn json_file_delete_one(title: String, user_id: i32) -> DeleteOneResponse {
     let mut tasks = get_all::<ToDoItem>().unwrap_or_else(|_| HashMap::new());
-    let to_do_item = tasks.remove(&title).ok_or_else(|| {
-        SchedulerServiceError::new(
-            "Item not found".to_string(),
-            SchedulerServiceErrorStatus::NotFound,
-        )
-    })?;
+    let to_do_item = tasks
+        .remove(&(title + ":" + &user_id.to_string()))
+        .ok_or_else(|| {
+            SchedulerServiceError::new(
+                "Item not found".to_string(),
+                SchedulerServiceErrorStatus::NotFound,
+            )
+        })?;
     let _ = save_all(&tasks)?;
     Ok(to_do_item)
 }

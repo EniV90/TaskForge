@@ -38,3 +38,10 @@ impl AllToDOItems {
         Ok(AllToDOItems { pending, done })
     }
 }
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[cfg_attr(feature = "sqlx-postgres", derive(sqlx::FromRow))]
+pub struct UserConnection {
+    pub user_id: i32,
+    pub to_do_id: i32,
+}

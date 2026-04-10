@@ -48,13 +48,16 @@ const App = () => {
 
   React.useEffect(() => {
     const fetchData = async () => {
-      const response = await getAll();
-      if (response.error) {
-        setError(response.error);
-      } else {
-        setData(response.data);
+      if (wasmReady && LoggedIn) {
+        const response = await getAll();
+        if (response.error) {
+          setError(response.error);
+        } else {
+          setData(response.data);
+        }
       }
     };
+
     if (wasmReady && LoggedIn) {
       fetchData();
     }

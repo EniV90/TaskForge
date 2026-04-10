@@ -16,32 +16,30 @@ use crate::connections::sqlx_postgres::SQLX_POSTGRES_POOL;
 #[cfg(feature = "sqlx-postgres")]
 use glue::errors::SchedulerServiceErrorStatus;
 
+pub type SaveOneResponse = Result<ToDoItem, SchedulerServiceError>;
 pub trait SaveOne {
     fn save_one(
         item: NewToDoItem,
+        user_id: i32,
     ) -> impl Future<Output = Result<ToDoItem, SchedulerServiceError>> + Send;
 }
 
 #[cfg(feature = "sqlx-postgres")]
 impl SaveOne for SqlxPostGresDescriptor {
-    fn save_one(
-        item: NewToDoItem,
-    ) -> impl Future<Output = Result<ToDoItem, SchedulerServiceError>> + Send {
-        sqlx_postgres_save_one(item)
+    fn save_one(item: NewToDoItem, user_id: i32) -> impl Future<Output = SaveOneResponse> + Send {
+        sqlx_postgres_save_one(item, user_id)
     }
 }
 
 #[cfg(feature = "json-file")]
 impl SaveOne for JsonFileDescriptor {
-    fn save_one(
-        item: NewToDoItem,
-    ) -> impl Future<Output = Result<ToDoItem, SchedulerServiceError>> + Send {
-        json_file_save_one(item)
+    fn save_one(item: NewToDoItem, user_id: i32) -> impl Future<Output = SaveOneResponse> + Send {
+        json_file_save_one(item, user_id)
     }
 }
 
 #[cfg(feature = "sqlx-postgres")]
-async fn sqlx_postgres_save_one(item: NewToDoItem) -> Result<ToDoItem, SchedulerServiceError> {
+async fn sqlx_postgres_save_one(item: NewToDoItem, user_id: i32) -> SaveOneResponse {
     let item = sqlx::query_as::<_, ToDoItem>(
         "INSERT INTO to_do_items (title, status) VALUES ($1, $2) RETURNING *",
     )
@@ -49,12 +47,24 @@ async fn sqlx_postgres_save_one(item: NewToDoItem) -> Result<ToDoItem, Scheduler
     .bind(item.status.to_string())
     .fetch_one(&*SQLX_POSTGRES_POOL)
     .await
-    .map_err(|e| {SchedulerServiceError::new(e.to_string(), SchedulerServiceErrorStatus::Unknown)})?;
+    .map_err(|e| SchedulerServiceError::new(e.to_string(), SchedulerServiceErrorStatus::Unknown))?;
+
+    let _ = sqlx::query(
+        "
+    INSERT INTO user_connections (user_id, to_do_id) VALUES ($1, $2)
+    ",
+    )
+    .bind(user_id)
+    .bind(item.id)
+    .execute(&*SQLX_POSTGRES_POOL)
+    .await
+    .map_err(|e| SchedulerServiceError::new(e.to_string(), SchedulerServiceErrorStatus::Unknown))?;
+
     Ok(item)
 }
 
 #[cfg(feature = "json-file")]
-async fn json_file_save_one(item: NewToDoItem) -> Result<ToDoItem, SchedulerServiceError> {
+async fn json_file_save_one(item: NewToDoItem, user_id: i32) -> SaveOneResponse {
     use std::collections::HashMap;
 
     let mut tasks = get_all::<ToDoItem>().unwrap_or_else(|_| HashMap::new());
@@ -63,7 +73,10 @@ async fn json_file_save_one(item: NewToDoItem) -> Result<ToDoItem, SchedulerServ
         title: item.title,
         status: item.status.to_string(),
     };
-    tasks.insert(to_do_item.title.to_string(), to_do_item.clone());
+    tasks.insert(
+        to_do_item.title.to_string() + ":" + &user_id.to_string(),
+        to_do_item.clone(),
+    );
     let _ = save_all(&tasks)?;
     Ok(to_do_item)
 }
