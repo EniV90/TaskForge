@@ -1,4 +1,3 @@
-
 services:
   postgres:
     container_name: "TaskForge-postgres"
@@ -10,3 +9,9 @@ services:
       - "POSTGRES_USER=username"
       - "POSTGRES_DB=taskForge"
       - "POSTGRES_PASSWORD=password"
+
+cache:
+  container-name: "TaskForge-redis"
+  build: "./session-cache/cache-module"
+  restart: always
+  ports: -'6379:6379'
