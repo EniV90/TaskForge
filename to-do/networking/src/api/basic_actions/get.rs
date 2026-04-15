@@ -1,5 +1,7 @@
 use actix_web::{HttpRequest, HttpResponse};
-use auth_kernel::api::users::get::get_user_by_unique_id;
+use auth_kernel::{
+    api::users::get::get_user_by_unique_id, user_sessions::transactions::get::GetUserSession,
+};
 use to_do_core::api::basic_actions::get::{
     get_all as get_all_core, get_by_name as get_by_name_core,
 };
@@ -10,9 +12,14 @@ use glue::{
     token::HeaderToken,
 };
 
-pub async fn get_all<T: GetAll>(token: HeaderToken) -> Result<HttpResponse, SchedulerServiceError> {
-    let user = get_user_by_unique_id(token.unique_id).await?;
-    Ok(HttpResponse::Ok().json(get_all_core::<T>(user.id).await?))
+pub async fn get_all<T, X>(token: HeaderToken) -> Result<HttpResponse, SchedulerServiceError>
+where
+    T: GetAll,
+    X: GetUserSession,
+{
+    let session = X::get_user_session(token.unique_id).await?;
+
+    Ok(HttpResponse::Ok().json(get_all_core::<T>(session.user_id).await?))
 }
 
 pub async fn get_by_name(req: HttpRequest) -> Result<HttpResponse, SchedulerServiceError> {
@@ -25,8 +32,6 @@ pub async fn get_by_name(req: HttpRequest) -> Result<HttpResponse, SchedulerServ
             ));
         }
     };
-    println!("Handler hit: {}", name);
-    println!("Incoming path: {}", req.path());
 
     Ok(HttpResponse::Ok().json(get_by_name_core(name).await?))
 }
