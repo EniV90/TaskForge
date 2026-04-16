@@ -10,3 +10,4 @@ auth-core = {path = "../core"}
 auth-dal = {path = "../dal"}
 glue = {path = "../../glue", features = ["actix"]}
 base64 = "0.22.1"
+auth-kernel ={ path = "../kernel", features = ["auth-core"], default-features = false}
