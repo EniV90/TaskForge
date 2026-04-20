@@ -95,7 +95,7 @@
 # curl -X POST http://127.0.0.1:8081/api/v1/users/create \
 #   -H "Content-Type: application/json" \
 #   -d '{
-#     "email": "test@gmail.com",
+#     "email": "test2@gmail.com",
 #     "password": "password"
 #   }'
 
@@ -183,7 +183,7 @@ sleep 5
 curl -X POST http://127.0.0.1:8081/api/v1/users/create \
   -H "Content-Type: application/json" \
   -d '{
-    "email": "test@gmail.com",
+    "email": "test2@gmail.com",
     "password": "password"
 }'
 

@@ -23,19 +23,19 @@ echo "{}" > tasks.json
 # # Create tasks
 curl -X POST http://127.0.0.1:8080/api/v1/create \
   -H "Content-Type: application/json" \
-  -d '{"title": "gaming", "status": "PENDING"}' >> output.txt
+  -d '{"title": "running", "status": "PENDING"}' >> output.txt
 
 echo "" >> output.txt
 
 curl -X POST http://127.0.0.1:8080/api/v1/create \
   -H "Content-Type: application/json" \
-  -d '{"title": "driving", "status": "PENDING"}' >> output.txt
+  -d '{"title": "football", "status": "PENDING"}' >> output.txt
 
 echo "" >> output.txt
 
 curl -X POST http://127.0.0.1:8080/api/v1/create \
   -H "Content-Type: application/json" \
-  -d '{"title": "coding", "status": "DONE"}' >> output.txt
+  -d '{"title": "gym", "status": "DONE"}' >> output.txt
 
 echo "" >> output.txt
 

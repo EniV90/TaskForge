@@ -13,3 +13,4 @@ to_do_server = {path = "../to-do/networking", package = "to-do-networking-server
 to-do-dal ={ path = "../to-do/dal", package = "to-do-dal", features = ["sqlx-postgres"]}
 auth_server ={path = "../auth/networking", package = "auth-networking-server"}
 auth-dal ={ path = "../auth/dal", package = "auth-dal"}
+glue ={ path = "../glue"}

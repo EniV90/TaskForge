@@ -12,6 +12,7 @@ to-do-core = { path = "../core"}
 glue = { path = "../../glue", features = ["actix"]}
 serde = {version = "1.0.228", features = ["derive"]}
 to-do-dal = {path = "../dal", features = ["sqlx-postgres"]}
+actix-cors = "0.7.1"
 
 auth-kernel = {path = "../../auth/kernel"}
 

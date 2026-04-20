@@ -9,4 +9,4 @@ chrono = "0.4.44"
 serde = {version = "1.0.228", features = ["derive"]}
 
 [lib]
-crate-type = ["cydlib"]
+crate-type = ["cdylib"]
