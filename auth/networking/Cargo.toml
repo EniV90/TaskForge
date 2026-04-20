@@ -8,6 +8,6 @@ actix-web = "4.13.0"
 tokio = {version = "1.51.0", features = ["full"]}
 auth-core = {path = "../core"}
 auth-dal = {path = "../dal"}
-glue = {path = "../../glue", features = ["actix"]}
+glue = {path = "../../glue", features = ["actix", "elastic-logger"]}
 base64 = "0.22.1"
-auth-kernel ={ path = "../kernel", features = ["auth-core"], default-features = false}
+auth-kernel ={ path = "../kernel", features = ["auth-core"], default-features = false} 

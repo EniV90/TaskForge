@@ -12,6 +12,12 @@ jsonwebtoken = {version = "10.3.0", features = ["rust_crypto"]}
 tracing = "0.1.44"
 tracing-subscriber = "0.3.23"
 futures-util = "0.3.32"
+chrono = {version = "0.4.44", optional = true}
+tokio = {version = "1.52.1", optional = true}
+reqwest = {version = "0.13.2", optional = true}
+serde_json = {version = "1.0.149", optional = true}
+once_cell = {version = "1.21.4", optional = true}
 
 [features]
-actix =["actix-web"]
+actix =["dep:actix-web"]
+elastic-logger=["dep:serde_json", "dep:tokio", "dep:reqwest", "dep:chrono"]
