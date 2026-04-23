@@ -15,3 +15,6 @@ json-file-storage = ["to-do-dal/json-file"]
 default = ["json-file-storage"]
 memory =["auth-kernel/core-postgres"]
 http=["auth-kernel/http"]
+
+[dev-dependencies]
+tokio = {version = "1.50.0", features = ["full"]}
