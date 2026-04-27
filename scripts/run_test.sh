@@ -6,3 +6,4 @@ cd $SCRIPTPATH
 cd ..
 
 cargo test -p to-do-core
+cargo test -p to-do-networking-server

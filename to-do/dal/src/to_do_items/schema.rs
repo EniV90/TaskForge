@@ -18,7 +18,7 @@ pub struct ToDoItem {
     pub status: String,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct AllToDOItems {
     pub pending: Vec<ToDoItem>,
     pub done: Vec<ToDoItem>,
