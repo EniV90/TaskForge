@@ -38,23 +38,26 @@ impl DeleteOne for JsonFileDescriptor {
 
 #[cfg(feature = "sqlx-postgres")]
 async fn sqlx_postgres_delete_one(title: String, user_id: i32) -> DeleteOneResponse {
-    let item =
-        sqlx::query_as::<_, ToDoItem>(" DELETE FROM to_do_items WHERE title = $1 RETURNING *")
-            .bind(title)
-            .fetch_one(&*SQLX_POSTGRES_POOL)
-            .await
-            .map_err(|e| {
-                SchedulerServiceError::new(e.to_string(), SchedulerServiceErrorStatus::Unknown)
-            })?;
+    let item = sqlx::query_as::<_, ToDoItem>(
+        " 
+        DELETE FROM to_do_items 
+        WHERE title = $1 
+        RETURNING *",
+    )
+    .bind(title)
+    .fetch_one(&*SQLX_POSTGRES_POOL)
+    .await
+    .map_err(|e| SchedulerServiceError::new(e.to_string(), SchedulerServiceErrorStatus::Unknown))?;
 
-    let _ = sqlx::query(" DELETE FROM user_connections WHERE user_id = $1 AND to_do_id = $2")
-        .bind(user_id)
-        .bind(item.id)
-        .execute(&*SQLX_POSTGRES_POOL)
-        .await
-        .map_err(|e| {
-            SchedulerServiceError::new(e.to_string(), SchedulerServiceErrorStatus::Unknown)
-        })?;
+    let _ = sqlx::query(
+        " DELETE FROM user_connections 
+    WHERE user_id = $1 AND to_do_id = $2",
+    )
+    .bind(user_id)
+    .bind(item.id)
+    .execute(&*SQLX_POSTGRES_POOL)
+    .await
+    .map_err(|e| SchedulerServiceError::new(e.to_string(), SchedulerServiceErrorStatus::Unknown))?;
     Ok(item)
 }
 
@@ -71,4 +74,92 @@ async fn json_file_delete_one(title: String, user_id: i32) -> DeleteOneResponse 
         })?;
     let _ = save_all(&tasks)?;
     Ok(to_do_item)
+}
+
+#[cfg(feature = "sqlx-postgres")]
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::migrations::run_migrations;
+    use glue::sql_command::WIPE_DB;
+
+    async fn setup() {
+        sqlx::query(WIPE_DB)
+            .execute(&*SQLX_POSTGRES_POOL)
+            .await
+            .unwrap();
+        run_migrations().await;
+    }
+
+    #[tokio::test]
+    async fn test_sqlx_postgres_delete_one_ok() {
+        setup().await;
+
+        let title = "test_sqlx_postgres_delete_one".to_string();
+        let user_id = 1;
+        let item = ToDoItem {
+            id: 1,
+            title: title.clone(),
+            status: "PENDING".to_string(),
+        };
+
+        let item = sqlx::query_as::<_, ToDoItem>(
+            "
+        INSERT INTO to_do_items(title, status)
+        VALUES ($1, $2)
+        RETURNING *
+        ",
+        )
+        .bind(item.title)
+        .bind(item.status.to_string())
+        .fetch_one(&*SQLX_POSTGRES_POOL)
+        .await
+        .unwrap();
+
+        let _ = sqlx::query("INSERT INTO user_connections (user_id, to_do_id) VALUES ($1, $2)")
+            .bind(user_id)
+            .bind(item.id)
+            .execute(&*SQLX_POSTGRES_POOL)
+            .await
+            .unwrap();
+
+        let result = sqlx_postgres_delete_one(title.clone(), user_id)
+            .await
+            .unwrap();
+        assert_eq!(result.title, title);
+
+        let result = sqlx::query_as::<_, ToDoItem>(
+            "
+        SELECT * FROM to_do_items
+        WHERE title = $1
+        ",
+        )
+        .bind(title)
+        .fetch_optional(&*SQLX_POSTGRES_POOL)
+        .await
+        .unwrap();
+        assert!(result.is_none());
+
+        let result = sqlx::query_as::<_, (i64,)>(
+            "
+        SELECT COUNT(*) FROM user_connections 
+        WHERE user_id = $1 AND to_do_id = $2
+        ",
+        )
+        .bind(user_id)
+        .bind(item.id)
+        .fetch_one(&*SQLX_POSTGRES_POOL)
+        .await
+        .unwrap();
+        assert_eq!(result.0, 0)
+    }
+
+    #[tokio::test]
+    async fn test_sqlx_postgres_delete_no_existing_item() {
+        setup().await;
+        let title = "placeholder".to_string();
+        let user_id = 1;
+        let result = sqlx_postgres_delete_one(title.clone(), user_id).await;
+        assert!(result.is_err())
+    }
 }
